@@ -2,8 +2,10 @@ name: 'AMI Terraform'
 
 on:
   push:
-    branches: [ "master" ]
-    paths: ["ami-terraform/**"]
+    branches:
+      - "master"
+    paths: 
+      - "ami-terraform/**"
   pull_request:
 
 permissions:
