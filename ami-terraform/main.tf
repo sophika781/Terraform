@@ -32,7 +32,7 @@ resource "aws_instance" "dev_ec2" {
 
 resource "aws_ami_from_instance" "image_from_dev" {
   name               = "image_from_dev"
-  source_instance_id = "i-08e25995e63c2b733"
+  source_instance_id = "aws_instance.dev_ec2.id"
 
   tags = {
     "Environment" = "Prod"
@@ -40,7 +40,7 @@ resource "aws_ami_from_instance" "image_from_dev" {
 }
 
 resource "aws_instance" "prod_ec2" {
-  ami = "ami-062abc21b7634219a"
+  ami = "aws_ami_from_instance.image_from_dev.id"
   instance_type = "t3.micro"
   vpc_security_group_ids = [aws_security_group.server_sg.id]
   tags = {
