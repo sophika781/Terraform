@@ -1,0 +1,69 @@
+name: 'VPC Terraform'
+
+on:
+  push:
+    branches:
+      - "master"
+    paths: 
+      - "vpc-terraform/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: vpc-terraform
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.ACCESSKEY }}
+        aws-secret-access-key: ${{ secrets.SECRETACCESSKEY }}
+        aws-region: us-east-1
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.9.8 
+
+    - name: Initialize Backend Setup
+      run: terraform init -from-module=./state_backend.tf   
+
+    - name: Plan Backend Resources
+      run: terraform plan -target=aws_s3_bucket.terraform_state -target=aws_dynamodb_table.terraform_locks -out=backend.plan
+  
+    - name: Apply Backend Resources
+      run: terraform apply -auto-approve backend.plan 
+
+    - name: Init Main Project
+      run: terraform init
+
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    - name: Plan Main Project
+      run: terraform plan
+
+    - name: Apply Main Project
+      run: terraform apply -auto-approve
+
+    - name: Terraform State List
+      run: terraform state list
+
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
