@@ -48,6 +48,12 @@ jobs:
     - name: Terraform Format
       run: terraform fmt -check
 
+    - name: Print current directory
+      run : pwd
+
+    - name : List files in directory
+      run : ls -l
+
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       run: terraform plan 
