@@ -1,7 +1,7 @@
 name: 'AMI Terraform'
 
 on:
-  push:
+  workflow_dispatch:
     branches:
       - "master"
     paths: 
