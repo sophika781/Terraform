@@ -42,6 +42,9 @@ jobs:
         terraform_version: 1.9.8 
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Destroy
+      run: terraform destroy
+      
     - name: Terraform Init
       run: terraform init
 
@@ -59,6 +62,3 @@ jobs:
 
     - name: Terraform State List
       run: terraform state list
-
-    - name: Terraform Destroy
-      run: terraform destroy
