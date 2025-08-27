@@ -48,3 +48,4 @@ resource "aws_instance" "prod_ec2" {
     "Environment" = "Prod"
   }
 }
+
