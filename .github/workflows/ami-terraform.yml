@@ -53,7 +53,15 @@ jobs:
 
     - name : List files in directory
       run : ls -l
+      
+    - name : Change current directory
+      run : cd ami-terraform
 
+    - name: Print current directory
+      run : pwd
+
+    - name : List files in directory
+      run : ls -l
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       run: terraform plan 
