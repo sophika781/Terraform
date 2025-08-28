@@ -51,7 +51,7 @@ jobs:
       run: terraform -chdir=backend_resources apply -auto-approve 
 
     - name: Init Main Project
-      run: terraform init
+      run: terraform init -reconfigure
 
     - name: Terraform Format
       run: terraform fmt -check
