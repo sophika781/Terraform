@@ -76,11 +76,24 @@ jobs:
       if: always()
       run: terraform destroy -auto-approve
 
-    - name: Force delete S3 bucket
+    - name: Empty and delete S3 bucket
       if: always()
       run: |
-        echo "Force deleting s3-backend-bucket-sophika..."
-        aws s3 rb s3://s3-backend-bucket-sophika --force
+        echo "Deleting all object versions..."
+        aws s3api list-object-versions --bucket s3-backend-bucket-sophika \
+          --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' \
+          --output json | \
+        aws s3api delete-objects --bucket s3-backend-bucket-sophika --delete file://-
+    
+        echo "Deleting all delete markers..."
+        aws s3api list-object-versions --bucket s3-backend-bucket-sophika \
+          --query '{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' \
+          --output json | \
+        aws s3api delete-objects --bucket s3-backend-bucket-sophika --delete file://-
+    
+        echo "Removing the bucket..."
+        aws s3 rb s3://s3-backend-bucket-sophika
+      shell: bash
 
     - name: Terraform Destroy Backend Resources
       if: always()
