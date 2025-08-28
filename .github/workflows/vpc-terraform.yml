@@ -82,18 +82,29 @@ jobs:
       run: |
         BUCKET="s3-backend-bucket-sophika"
         
-        # Get all versions and delete markers in one JSON
-        OBJECTS=$(aws s3api list-object-versions \
+        # Get versions
+        VERSIONS=$(aws s3api list-object-versions \
           --bucket $BUCKET \
-          --query='{Objects: Versions[].{Key:Key,VersionId:VersionId} + DeleteMarkers[].{Key:Key,VersionId:VersionId}}')
+          --query 'Versions[].{Key:Key,VersionId:VersionId}')
         
-        # Delete if not empty
-        if [ "$OBJECTS" != '{"Objects":[]}' ]; then
-          aws s3api delete-objects --bucket $BUCKET --delete "$OBJECTS"
+        # Delete versions if any
+        if [ "$VERSIONS" != "[]" ]; then
+          aws s3api delete-objects --bucket $BUCKET --delete "{\"Objects\": $VERSIONS}"
         fi
         
-        # Remove the bucket
+        # Get delete markers
+        MARKERS=$(aws s3api list-object-versions \
+          --bucket $BUCKET \
+          --query 'DeleteMarkers[].{Key:Key,VersionId:VersionId}')
+        
+        # Delete delete markers if any
+        if [ "$MARKERS" != "[]" ]; then
+          aws s3api delete-objects --bucket $BUCKET --delete "{\"Objects\": $MARKERS}"
+        fi
+        
+        # Remove bucket
         aws s3 rb s3://$BUCKET
+
 
     
         # Remove the bucket itself
