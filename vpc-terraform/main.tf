@@ -10,21 +10,21 @@ resource "aws_vpc" "main_vpc" {
   }
 }
 
-resource "aws_subnet" "public_vpc" {
+resource "aws_subnet" "public_subnet" {
   vpc_id     = aws_vpc.main_vpc.id
   cidr_block = "10.0.0.0/24"
 
   tags = {
-    "Name" = "public_vpc"
+    "Name" = "public_subnet"
   }
 }
 
-resource "aws_subnet" "private_vpc" {
+resource "aws_subnet" "private_subnet" {
   vpc_id     = aws_vpc.main_vpc.id
   cidr_block = "10.0.1.0/24"
 
   tags = {
-    "Name" = "private_vpc"
+    "Name" = "private_subnet"
   }
 }
 
@@ -59,6 +59,7 @@ resource "aws_instance" "server_ec2" {
     ami = "ami-0b016c703b95ecbe4"
     instance_type = "t3.micro"
     vpc_security_group.ids = [aws_security_group.server_sg.id]
+    subnet_id = aws_subnet.public_subnet.id
     tags = {
         "Name" = "server_ec2"
     }
