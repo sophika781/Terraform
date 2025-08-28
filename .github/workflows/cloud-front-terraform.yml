@@ -59,6 +59,3 @@ jobs:
 
     - name: Terraform State List
       run: terraform state list
-
-    - name: Terraform Destroy
-      run: terraform destroy -auto-approve
