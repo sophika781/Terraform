@@ -42,13 +42,13 @@ jobs:
         terraform_version: 1.9.8 
 
     - name: Initialize Backend Setup
-      run: terraform init -from-module=./state_backend.tf   
+      run: terraform -chdir=backend_resources init -reconfigure  
 
     - name: Plan Backend Resources
-      run: terraform plan -target=aws_s3_bucket.terraform_state -target=aws_dynamodb_table.terraform_locks -out=backend.plan
+      run: terraform plan -chdir=backend_resources
   
     - name: Apply Backend Resources
-      run: terraform apply -auto-approve backend.plan 
+      run: terraform apply -auto-approve -chdir=backend_resources
 
     - name: Init Main Project
       run: terraform init
