@@ -50,6 +50,11 @@ jobs:
     - name: Apply Backend Resources
       run: terraform -chdir=backend_resources apply -auto-approve 
 
+    - name: Wait for S3 backend to propagate
+      run: |
+        echo "Waiting for S3 backend to be ready..."
+        sleep 15  # 15 seconds for propagation
+
     - name: Init Main Project
       run: terraform init -reconfigure
 
