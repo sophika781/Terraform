@@ -32,23 +32,20 @@ resource "aws_s3_bucket_policy" "s3_backend_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AllowTerraformStateAccess"
-        Effect = "Allow"
-        Principal = {
-            AWS = "arn:aws:iam::738859113678:user/DevSophika"
-        }
-        Action = [
+        Sid       = "AllowTerraformStateAccess"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject"
         ]
-        Resource = [
-          "arn:aws:s3:::s3-backend-bucket-sophika/terraform.tfstate"
-        ]
+        Resource = "arn:aws:s3:::${aws_s3_bucket.s3_backend_bucket.id}/terraform.tfstate"
       }
     ]
   })
 }
+
 
 resource "aws_dynamodb_table" "terraform_lock" {
     name = "terraform_lock"
