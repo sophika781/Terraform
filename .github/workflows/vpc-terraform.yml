@@ -45,10 +45,10 @@ jobs:
       run: terraform -chdir=backend_resources init -reconfigure  
 
     - name: Plan Backend Resources
-      run: terraform plan -chdir=backend_resources
+      run: terraform -chdir=backend_resources plan
   
     - name: Apply Backend Resources
-      run: terraform apply -auto-approve -chdir=backend_resources
+      run: terraform -chdir=backend_resources apply -auto-approve 
 
     - name: Init Main Project
       run: terraform init
