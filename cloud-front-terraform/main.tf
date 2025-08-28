@@ -60,6 +60,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
+  comment             = "CloudFront Distribution to host static S3 bucket content"
   enabled             = true
   default_root_object = "index.html"
 
