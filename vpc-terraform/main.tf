@@ -58,7 +58,7 @@ resource "aws_security_group" "server_sg" {
 resource "aws_instance" "server_ec2" {
     ami = "ami-0b016c703b95ecbe4"
     instance_type = "t3.micro"
-    vpc_security_group.ids = [aws_security_group.server_sg.id]
+    vpc_security_group_ids = [aws_security_group.server_sg.id]
     subnet_id = aws_subnet.public_subnet.id
     tags = {
         "Name" = "server_ec2"
