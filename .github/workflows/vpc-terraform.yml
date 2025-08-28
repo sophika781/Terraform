@@ -41,24 +41,8 @@ jobs:
       with:
         terraform_version: 1.9.8 
 
-    - name: Initialize Backend Setup
-      run: terraform -chdir=backend_resources init -reconfigure  
-
-    - name: Plan Backend Resources
-      run: terraform -chdir=backend_resources plan
-  
-    - name: Apply Backend Resources
-      run: terraform -chdir=backend_resources apply -auto-approve 
-
-    - name: Wait for S3 bucket to be ready
-      run: |
-        until aws s3api head-bucket --bucket s3-backend-bucket-sophika 2>/dev/null; do
-          echo "Waiting for S3 bucket..."
-          sleep 5
-        done
-
     - name: Init Main Project
-      run: terraform init -reconfigure
+      run: terraform init
 
     - name: Terraform Format
       run: terraform fmt -check
@@ -72,39 +56,6 @@ jobs:
     - name: Terraform State List
       run: terraform state list
 
-    - name: Terraform Destroy
-      if: always()
-      run: terraform destroy -auto-approve
-
-    - name: Empty and delete S3 bucket
-      if: always()
-      shell: bash
-      run: |
-        BUCKET="s3-backend-bucket-sophika"
-        
-        # Delete all object versions
-        VERSIONS=$(aws s3api list-object-versions \
-          --bucket $BUCKET \
-          --query 'Versions[].{Key:Key,VersionId:VersionId}' \
-          --output json)
-        
-        if [ "$VERSIONS" != "[]" ] && [ "$VERSIONS" != "" ]; then
-          aws s3api delete-objects --bucket $BUCKET --delete "{\"Objects\": $VERSIONS}"
-        fi
-        
-        # Delete all delete markers
-        MARKERS=$(aws s3api list-object-versions \
-          --bucket $BUCKET \
-          --query 'DeleteMarkers[].{Key:Key,VersionId:VersionId}' \
-          --output json)
-        
-        if [ "$MARKERS" != "[]" ] && [ "$MARKERS" != "" ] && [ "$MARKERS" != "null" ]; then
-          aws s3api delete-objects --bucket $BUCKET --delete "{\"Objects\": $MARKERS}"
-        fi
-        
-        # Remove the bucket itself (only once)
-        aws s3 rb s3://$BUCKET
-
-    - name: Terraform Destroy Backend Resources
-      if: always()
-      run: terraform -chdir=backend_resources destroy -auto-approve
+#   - name: Terraform Destroy
+#     if: always()
+#     run: terraform destroy -auto-approve
