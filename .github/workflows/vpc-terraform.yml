@@ -105,11 +105,6 @@ jobs:
         # Remove the bucket itself (only once)
         aws s3 rb s3://$BUCKET
 
-    
-        # Remove the bucket itself
-        aws s3 rb s3://$BUCKET
-
-
     - name: Terraform Destroy Backend Resources
       if: always()
       run: terraform -chdir=backend_resources destroy -auto-approve
