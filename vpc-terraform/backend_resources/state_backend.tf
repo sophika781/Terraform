@@ -16,6 +16,29 @@ resource "aws_s3_bucket_versioning" "versioning" {
     }
 }
 
+resource "aws_s3_bucket_policy" "s3_backend_policy" {
+  bucket = aws_s3_bucket.s3_backend_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowTerraformStateAccess"
+        Effect = "Allow"
+        Principal = "*"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+        ]
+        Resource = [
+          "arn:aws:s3:::s3-backend-bucket/terraform.tfstate"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_dynamodb_table" "terraform_lock" {
     name = "terraform_lock"
     billing_mode   = "PAY_PER_REQUEST"
