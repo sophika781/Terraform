@@ -30,7 +30,7 @@ resource "aws_subnet" "private_subnet" {
 
 resource "aws_security_group" "server_sg" {
   description = "Security group for the EC2 instance"
-  vpc_id = aws_vpc.main_vpc.id
+  vpc_id      = aws_vpc.main_vpc.id
 
   ingress {
     description = "SSH"
