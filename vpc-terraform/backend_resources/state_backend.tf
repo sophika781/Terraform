@@ -25,7 +25,9 @@ resource "aws_s3_bucket_policy" "s3_backend_policy" {
       {
         Sid    = "AllowTerraformStateAccess"
         Effect = "Allow"
-        Principal = "*"
+        Principal = {
+            AWS = "arn:aws:iam::738859113678:user/DevSophika"
+        }
         Action = [
           "s3:GetObject",
           "s3:PutObject",
