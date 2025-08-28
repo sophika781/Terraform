@@ -98,7 +98,7 @@ jobs:
           --query 'DeleteMarkers[].{Key:Key,VersionId:VersionId}' \
           --output json)
         
-        if [ "$MARKERS" != "[]" ] && [ "$MARKERS" != "" ]; then
+        if [ "$MARKERS" != "[]" ] && [ "$MARKERS" != "" ] && [ "$MARKERS" != "null" ]; then
           aws s3api delete-objects --bucket $BUCKET --delete "{\"Objects\": $MARKERS}"
         fi
         
