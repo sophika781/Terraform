@@ -78,22 +78,23 @@ jobs:
 
     - name: Empty and delete S3 bucket
       if: always()
-      run: |
-        echo "Deleting all object versions..."
-        aws s3api list-object-versions --bucket s3-backend-bucket-sophika \
-          --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' \
-          --output json | \
-        aws s3api delete-objects --bucket s3-backend-bucket-sophika --delete file://-
-    
-        echo "Deleting all delete markers..."
-        aws s3api list-object-versions --bucket s3-backend-bucket-sophika \
-          --query '{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' \
-          --output json | \
-        aws s3api delete-objects --bucket s3-backend-bucket-sophika --delete file://-
-    
-        echo "Removing the bucket..."
-        aws s3 rb s3://s3-backend-bucket-sophika
       shell: bash
+      run: |
+        BUCKET="s3-backend-bucket-sophika"
+    
+        # Delete all objects, including all versions and delete markers
+        aws s3api list-object-versions --bucket $BUCKET --query 'Versions[].{Key:Key,VersionId:VersionId}' --output json > versions.json
+        aws s3api list-object-versions --bucket $BUCKET --query 'DeleteMarkers[].{Key:Key,VersionId:VersionId}' --output json > markers.json
+    
+        for FILE in versions.json markers.json; do
+          if [ -s $FILE ]; then
+            aws s3api delete-objects --bucket $BUCKET --delete "file://$FILE"
+          fi
+        done
+    
+        # Remove the bucket itself
+        aws s3 rb s3://$BUCKET
+
 
     - name: Terraform Destroy Backend Resources
       if: always()
