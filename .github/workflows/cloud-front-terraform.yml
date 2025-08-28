@@ -60,5 +60,9 @@ jobs:
     - name: Terraform State List
       run: terraform state list
 
+    - name : Upload Index.html file to S3 bucket
+      run: |
+        aws s3 cp index.html s3://${{ secrets.S3_BUCKET }}/
+
 #   - name: Terraform Destroy
 #     run: terraform destroy -auto-approve
