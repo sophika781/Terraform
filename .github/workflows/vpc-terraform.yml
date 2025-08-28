@@ -75,3 +75,7 @@ jobs:
     - name: Terraform Destroy
       if: always()
       run: terraform destroy -auto-approve
+
+    - name: Terraform Destroy
+      if: always()
+      run: terraform -chdir=backend_resources destroy -auto-approve
