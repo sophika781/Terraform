@@ -16,6 +16,15 @@ resource "aws_s3_bucket_versioning" "versioning" {
     }
 }
 
+resource "aws_s3_bucket_public_access_block" "disable_block" {
+  bucket                  = aws_s3_bucket.s3_backend_bucket.id
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+
 resource "aws_s3_bucket_policy" "s3_backend_policy" {
   bucket = aws_s3_bucket.s3_backend_bucket.id
 
@@ -25,7 +34,9 @@ resource "aws_s3_bucket_policy" "s3_backend_policy" {
       {
         Sid    = "AllowTerraformStateAccess"
         Effect = "Allow"
-        Principal = "*"
+        Principal = {
+            AWS = "arn:aws:iam::738859113678:user/DevSophika"
+        }
         Action = [
           "s3:GetObject",
           "s3:PutObject",
@@ -34,11 +45,6 @@ resource "aws_s3_bucket_policy" "s3_backend_policy" {
         Resource = [
           "arn:aws:s3:::s3-backend-bucket-sophika/terraform.tfstate"
         ]
-        Condition = {
-          StringEquals = {
-            "aws:PrincipalAccount" = data.aws_caller_identity.current.account_id
-          }
-        }
       }
     ]
   })
