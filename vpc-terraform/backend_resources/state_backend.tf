@@ -25,17 +25,20 @@ resource "aws_s3_bucket_policy" "s3_backend_policy" {
       {
         Sid    = "AllowTerraformStateAccess"
         Effect = "Allow"
-        Principal = {
-            AWS = "arn:aws:iam::738859113678:user/DevSophika"
-        }
+        Principal = "*"
         Action = [
           "s3:GetObject",
           "s3:PutObject",
-          "s3:DeleteObject",
+          "s3:DeleteObject"
         ]
         Resource = [
           "arn:aws:s3:::s3-backend-bucket-sophika/terraform.tfstate"
         ]
+        Condition = {
+          StringEquals = {
+            "aws:PrincipalAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
       }
     ]
   })
