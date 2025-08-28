@@ -81,3 +81,7 @@ jobs:
       run: |
         echo "Force deleting s3-backend-bucket-sophika..."
         aws s3 rb s3://s3-backend-bucket-sophika --force
+
+    - name: Terraform Destroy Backend Resources
+      if: always()
+      run: terraform -chdir=backend_resources destroy -auto-approve
