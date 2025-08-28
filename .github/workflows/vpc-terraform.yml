@@ -66,4 +66,5 @@ jobs:
       run: terraform state list
 
     - name: Terraform Destroy
+      if: always()
       run: terraform destroy -auto-approve
