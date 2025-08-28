@@ -1,25 +1,7 @@
-variable "backend_bucket" {
-  description = "Name of the backend bucket"
-  type        = string
-  default     = "s3-backend-bucket-sophika"
-}
-
-variable "terraform-lock" {
-  description = "Name of the dynamo db table for acquire lock"
-  type        = string
-  default     = "terraform-locks"
-}
-
 variable "region" {
   description = "The region of that is hosting all the resources"
   type        = string
   default     = "us-east-1"
-}
-
-variable "hash_key" {
-  description = "Hash key for the dynamo db table"
-  type        = string
-  default     = "LockID"
 }
 
 variable "s3_cloud_front_bucket" {
