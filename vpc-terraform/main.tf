@@ -63,7 +63,7 @@ resource "aws_instance" "server_ec2" {
     tags = {
         "Name" = "server_ec2"
     }
-    user_data = <<- EOF
+    user_data = <<-EOF
         #!/bin/bash
         sudo su
         yum update -y
