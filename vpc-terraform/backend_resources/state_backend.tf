@@ -32,7 +32,7 @@ resource "aws_s3_bucket_policy" "s3_backend_policy" {
           "s3:DeleteObject",
         ]
         Resource = [
-          "arn:aws:s3:::s3-backend-bucket/terraform.tfstate"
+          "arn:aws:s3:::s3-backend-bucket-sophika/terraform.tfstate"
         ]
       }
     ]
