@@ -5,6 +5,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "s3_backend_bucket"{
     bucket = "s3-backend-bucket-sophika"
+    acl = "private"
 }
 
 resource "aws_s3_bucket_versioning" "versioning" {
