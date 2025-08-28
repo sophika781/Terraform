@@ -76,6 +76,18 @@ jobs:
       if: always()
       run: terraform destroy -auto-approve
 
+    - name: Empty S3 Bucket if Needed
+      if: always()
+      run: |
+        OBJECTS=$(aws s3api list-objects-v2 --bucket s3-backend-bucket-sophika --query 'Contents' --output json)
+        
+        if [ "$OBJECTS" != "[]" ]; then
+          echo "Bucket is not empty. Emptying it..."
+          aws s3 rm s3://s3-backend-bucket-sophika --recursive
+        else
+          echo "Bucket is already empty."
+        fi
+    
     - name: Terraform Destroy
       if: always()
       run: terraform -chdir=backend_resources destroy -auto-approve
