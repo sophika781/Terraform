@@ -55,3 +55,20 @@ resource "aws_security_group" "server_sg" {
   }
 }
 
+resource "aws_instance" "server_ec2" {
+    ami = "ami-0b016c703b95ecbe4"
+    instance_type = "t3.micro"
+    vpc_security_group.ids = [aws_security_group.server_sg.id]
+    tags = {
+        "Name" = "server_ec2"
+    }
+    user_data = <<- EOF
+        #!/bin/bash
+        sudo su
+        yum update -y
+        amazon-linux-extras enable nginx1
+        yum install -y nginx
+        systemctl start nginx
+        systemctl enable nginx
+        EOF
+}
