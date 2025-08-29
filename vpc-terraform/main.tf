@@ -126,6 +126,10 @@ resource "aws_instance" "server_ec2" {
         yum install -y nginx
         systemctl start nginx
         systemctl enable nginx
+        dnf update -y
+        dnf install -y postgresql17 postgresql17-server postgresql17-contrib
+        systemctl enable postgresql
+        systemctl start postgresql
         EOF
 }
 
