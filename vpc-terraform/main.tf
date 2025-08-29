@@ -54,7 +54,7 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-resource "aws_subnet" "private_subnet-2" {
+resource "aws_subnet" "private_subnet_2" {
   vpc_id            = aws_vpc.main_vpc.id
   cidr_block        = var.private_cidr_block_2
   availability_zone = "us-east-1b"
@@ -149,7 +149,7 @@ resource "aws_security_group" "db_sg" {
 
 resource "aws_db_subnet_group" "private_group" {
   name       = "private_subnet_group"
-  subnet_ids = [aws_subnet.private_subnet.id, aws_subnet.private_subnet-2]
+  subnet_ids = [aws_subnet.private_subnet.id, aws_subnet.private_subnet_2.id]
 }
 
 resource "aws_db_instance" "postgresql_rds" {
