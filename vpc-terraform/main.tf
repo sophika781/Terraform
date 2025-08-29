@@ -104,6 +104,10 @@ resource "aws_security_group" "server_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  tags = {
+    "Name" = "EC2 server security group"
+  }
+
 }
 
 resource "aws_instance" "server_ec2" {
@@ -145,6 +149,10 @@ resource "aws_security_group" "db_sg" {
     cidr_blocks = ["10.0.0.0/24"]
   }
 
+  tags = {
+    "Name" = "DB security group"
+  }
+
 }
 
 resource "aws_db_subnet_group" "private_group" {
@@ -160,7 +168,7 @@ resource "aws_db_instance" "postgresql_rds" {
   allocated_storage = 20
   storage_type      = "gp2"
 
-  username = "admin"
+  username = "postgres-admin"
   password = var.rds_password
 
   vpc_security_group_ids = [aws_security_group.db_sg.id]
