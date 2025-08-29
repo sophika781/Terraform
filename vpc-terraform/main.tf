@@ -156,7 +156,7 @@ resource "aws_security_group" "db_sg" {
 }
 
 resource "aws_db_subnet_group" "private_group" {
-  name       = "private_subnet_group"
+  name       = "private_subnet_group_sophika"
   subnet_ids = [aws_subnet.private_subnet.id, aws_subnet.private_subnet_2.id]
 }
 
