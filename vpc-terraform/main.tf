@@ -168,7 +168,7 @@ resource "aws_db_instance" "postgresql_rds" {
   allocated_storage = 20
   storage_type      = "gp2"
 
-  username = "postgres-admin"
+  username = "pgadmin"
   password = var.rds_password
 
   vpc_security_group_ids = [aws_security_group.db_sg.id]
