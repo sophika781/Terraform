@@ -48,10 +48,10 @@ jobs:
       run: terraform fmt -check
 
     - name: Plan Main Project
-      run: terraform plan
+      run: terraform plan -var="rds_password=${{ secrets.RDS_PASSWORD }}"
 
     - name: Apply Main Project
-      run: terraform apply -auto-approve
+      run: terraform apply -auto-approve -var="rds_password=${{ secrets.RDS_PASSWORD }}"
 
     - name: Terraform State List
       run: terraform state list
