@@ -25,28 +25,28 @@ resource "aws_s3_bucket_lifecycle_configuration" "example" {
       prefix = ""
     }
     transition {
-      days          = 30
-      storage_class = "GLACIER"
+      days          = var.days_transition_1
+      storage_class = var.storage_class_1
     }
     transition {
-      days          = 120
-      storage_class = "DEEP_ARCHIVE"
+      days          = var.days_transition_2
+      storage_class = var.storage_class_2
     }
     expiration {
-      days = 365
+      days = var.days_expiration
     }
 
     noncurrent_version_expiration {
-      noncurrent_days = 365
+      noncurrent_days = var.days_expiration
     }
 
     noncurrent_version_transition {
-      noncurrent_days = 30
-      storage_class   = "GLACIER"
+      noncurrent_days = var.days_transition_1
+      storage_class   = var.storage_class_1
     }
     noncurrent_version_transition {
-      noncurrent_days = 120
-      storage_class   = "DEEP_ARCHIVE"
+      noncurrent_days = var.days_transition_2
+      storage_class   = var.storage_class_2
     }
   }
 }
