@@ -16,8 +16,20 @@ variable "s3_log_store_bucket" {
   default     = "s3-log-store-sophika"
 }
 
+variable "storage_class_1" {
+  description = "First storage class to transfer the objects to"
+  type        = string
+  default     = "GLACIER"
+}
+
+variable "storage_class_2" {
+  description = "Second storage class to transfer the objects to"
+  type        = string
+  default     = "DEEP_ARCHIVE"
+}
+
 variable "days_transition_1" {
-  description = "Number of days to transition to Glacier storage class"
+  description = "Number of days to transition to Deep Glacier storage class"
   type        = number
   default     = 30
 }
