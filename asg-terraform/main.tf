@@ -112,13 +112,13 @@ resource "aws_instance" "server_ec2" {
 }
 
 resource "aws_ami_from_instance" "ami_from_ec2" {
-  name               = "ami_from_ec2"
+  name               = "ami_from_ec2-terraform"
   source_instance_id = aws_instance.server_ec2.id
   depends_on         = [aws_instance.server_ec2]
 }
 
 resource "aws_launch_template" "my_launch_template" {
-  name                   = "my-launch-template"
+  name                   = "my-launch-template-terraform"
   image_id               = aws_ami_from_instance.ami_from_ec2.id
   instance_type          = var.instance_type
   key_name               = "test-pair"
@@ -137,7 +137,7 @@ resource "aws_launch_template" "my_launch_template" {
 }
 
 resource "aws_lb_target_group" "app_tg" {
-  name     = "app-tg"
+  name     = "app-tg-terraform"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
@@ -153,7 +153,7 @@ resource "aws_lb_target_group" "app_tg" {
 }
 
 resource "aws_lb" "app_lb" {
-  name               = "app-lb"
+  name               = "app-lb-terraform"
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = [aws_subnet.public_1.id, aws_subnet.public_2.id]
@@ -170,6 +170,7 @@ resource "aws_lb_listener" "app_lb_listener" {
 }
 
 resource "aws_autoscaling_group" "app_asg" {
+  name                = "app-asg-terraform"
   desired_capacity    = 2
   min_size            = 2
   max_size            = 3
@@ -181,5 +182,5 @@ resource "aws_autoscaling_group" "app_asg" {
     version = "$Latest"
   }
   target_group_arns = [aws_lb_target_group.app_tg.arn]
-
+  depends_on        = [aws_launch_template.my_launch_template]
 }
