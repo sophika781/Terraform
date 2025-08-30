@@ -90,25 +90,25 @@ resource "aws_security_group" "alb_sg" {
 }
 
 resource "aws_instance" "server_ec2" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.server_sg.id]
-  subnet_id              = aws_subnet.public_1.id
-  key_name               = "test-pair"
-
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  vpc_security_group_ids      = [aws_security_group.server_sg.id]
+  subnet_id                   = aws_subnet.public_1.id
+  key_name                    = "test-pair"
+  associate_public_ip_address = true
   tags = {
     "Name" = var.instance_name
   }
 
-  #user_data = <<-EOF
-  #!/bin/bash
-  #     sudo su
-  #     yum update -y
-  #     yum install -y httpd
-  #     echo "<html><body><h1>My Simple Webpage</h1></body></html>" > /var/www/html/index.html
-  #     systemctl start httpd
-  #     systemctl enable httpd
-  #     EOF
+  user_data = <<-EOF
+    #!/bin/bash
+        sudo su
+        yum update -y
+        yum install -y httpd
+        echo "<html><body><h1>My Simple Webpage</h1></body></html>" > /var/www/html/index.html
+        systemctl start httpd
+        systemctl enable httpd
+        EOF
 }
 
 resource "aws_ami_from_instance" "ami_from_ec2" {
@@ -124,16 +124,16 @@ resource "aws_launch_template" "my_launch_template" {
   key_name               = "test-pair"
   vpc_security_group_ids = [aws_security_group.server_sg.id]
 
-  user_data = base64encode(<<-EOF
-        #!/bin/bash
-        sudo su
-        yum update -y
-        yum install -y httpd
-        echo "<html><body><h1>My Simple Webpage</h1></body></html>" > /var/www/html/index.html
-        systemctl start httpd
-        systemctl enable httpd
-        EOF
-  )
+  #user_data = base64encode(<<-EOF
+  #      #!/bin/bash
+  #      sudo su
+  #      yum update -y
+  #      yum install -y httpd
+  #      echo "<html><body><h1>My Simple Webpage</h1></body></html>" > /var/www/html/index.html
+  #      systemctl start httpd
+  #      systemctl enable httpd
+  #      EOF
+  #)
 }
 
 resource "aws_lb_target_group" "app_tg" {
