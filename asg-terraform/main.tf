@@ -43,7 +43,8 @@ resource "aws_route_table_association" "public_2" {
 }
 
 resource "aws_security_group" "server_sg" {
-  name = var.ec2_security_group_name
+  name   = var.ec2_security_group_name
+  vpc_id = aws_vpc.main.id
 
   ingress {
     description = "SSH"
@@ -70,8 +71,8 @@ resource "aws_security_group" "server_sg" {
 }
 
 resource "aws_security_group" "alb_sg" {
-  name = var.alb_security_group_name
-
+  name   = var.alb_security_group_name
+  vpc_id = aws_vpc.main.id
   ingress {
     description = "HTTP"
     from_port   = 80
