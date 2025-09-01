@@ -230,6 +230,7 @@ resource "aws_ami_from_instance" "app_ami" {
 }
 
 resource "aws_instance" "test_ec2" {
+  subnet_id              = aws_subnet.public_1.id
   ami                    = aws_ami_from_instance.app_ami.id
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.server_sg.id]
