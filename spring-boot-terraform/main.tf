@@ -209,7 +209,6 @@ resource "aws_ami_from_instance" "app_ami" {
       private_key = file("~/.ssh/test-pair.pem")
     }
   }
-
 }
 
 
