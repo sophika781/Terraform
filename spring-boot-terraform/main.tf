@@ -103,6 +103,27 @@ resource "aws_security_group" "db_sg" {
   }
 }
 
+resource "aws_db_subnet_group" "private_group" {
+  name       = "private_subnet_group_sophika"
+  subnet_ids = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+}
+
+resource "aws_db_instance" "postgre_db" {
+  engine            = "postgres"
+  engine_version    = "17.6"
+  identifier        = "postgres-rds"
+  instance_class    = "db.t3.micro"
+  allocated_storage = 20
+  storage_type      = "gp2"
+
+  username = "pgadmin"
+  password = var.rds_password
+
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  db_subnet_group_name   = aws_db_subnet_group.private_group.name
+  skip_final_snapshot    = true
+}
+
 resource "aws_iam_role" "ec2_role" {
   name = "ec2-s3-role"
 
@@ -148,35 +169,47 @@ resource "aws_instance" "app_server" {
         sudo yum install -y java-17-amazon-corretto-headless awscli
         aws s3 cp s3://s3-backend-bucket-sophika/spring-petclinic-3.5.0-SNAPSHOT.jar /home/ec2-user/myapp.jar
         sudo chown ec2-user:ec2-user /home/ec2-user/myapp.jar
-        nohup java -jar /home/ec2-user/myapp.jar > /home/ec2-user/app.log 2> /home/ec2-user/app-error.log &
+        sudo tee /etc/systemd/system/myapp.service > /dev/null <<EOL
+            [Unit]
+            Description=Spring Boot Application
+            After=network.target
+
+            [Service]
+            User=ec2-user
+            ExecStart=/usr/bin/java -jar /home/ec2-user/myapp.jar
+            Restart=always
+            RestartSec=5
+            StandardOutput=append:/home/ec2-user/app.log
+            StandardError=append:/home/ec2-user/app-error.log
+
+            [Install]
+            WantedBy=multi-user.target
+            EOL
+        sudo systemctl daemon-reload
+        sudo systemctl enable myapp
+        sudo systemctl start myapp
+        touch /tmp/app_ready
     EOF
-}
-
-resource "aws_db_subnet_group" "private_group" {
-  name       = "private_subnet_group_sophika"
-  subnet_ids = [aws_subnet.private_1.id, aws_subnet.private_2.id]
-}
-
-resource "aws_db_instance" "postgre_db" {
-  engine            = "postgres"
-  engine_version    = "17.6"
-  identifier        = "postgres-rds"
-  instance_class    = "db.t3.micro"
-  allocated_storage = 20
-  storage_type      = "gp2"
-
-  username = "pgadmin"
-  password = var.rds_password
-
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
-  db_subnet_group_name   = aws_db_subnet_group.private_group.name
-  skip_final_snapshot    = true
 }
 
 resource "aws_ami_from_instance" "app_ami" {
   name               = "EC2 AMI"
   source_instance_id = aws_instance.app_server.id
   depends_on         = [aws_instance.app_server]
+
+  provisioner "remote-exec" {
+    inline = [
+      "while [ ! -f /tmp/app_ready ]; do sleep 5; done"
+    ]
+
+    connection {
+      type        = "ssh"
+      host        = aws_instance.app_server.public_ip
+      user        = "ec2-user"
+      private_key = file("~/.ssh/test-pair.pem")
+    }
+  }
+
 }
 
 
