@@ -180,3 +180,4 @@ resource "aws_ami_from_instance" "app_ami" {
 }
 
 
+
