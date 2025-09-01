@@ -218,11 +218,7 @@ resource "aws_instance" "app_server" {
         sudo systemctl daemon-reload
         sudo systemctl enable myapp
         sudo systemctl start myapp
-        sudo dnf install -y postgresql17 postgresql17-server postgresql17-contrib
-        sudo /usr/bin/postgresql-setup --initdb
-        sudo systemctl enable postgresql
-        sudo systemctl enable postgresql
-        sudo systemctl start postgresql
+        sudo dnf install -y postgresql17
     EOF
 }
 
@@ -230,7 +226,6 @@ resource "aws_ami_from_instance" "app_ami" {
   name               = "EC2 AMI"
   source_instance_id = aws_instance.app_server.id
   depends_on         = [aws_instance.app_server]
-
 }
 
 
