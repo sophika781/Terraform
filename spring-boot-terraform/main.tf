@@ -165,26 +165,27 @@ resource "aws_instance" "app_server" {
 
   user_data = <<-EOF
         #!/bin/bash
+        set -xe
         sudo yum update -y
         sudo yum install -y java-17-amazon-corretto-headless awscli
         aws s3 cp s3://s3-backend-bucket-sophika/spring-petclinic-3.5.0-SNAPSHOT.jar /home/ec2-user/myapp.jar
         sudo chown ec2-user:ec2-user /home/ec2-user/myapp.jar
         sudo tee /etc/systemd/system/myapp.service > /dev/null <<EOL
-            [Unit]
-            Description=Spring Boot Application
-            After=network.target
+        [Unit]
+        Description=Spring Boot Application
+        After=network.target
 
-            [Service]
-            User=ec2-user
-            ExecStart=/usr/bin/java -jar /home/ec2-user/myapp.jar
-            Restart=always
-            RestartSec=5
-            StandardOutput=file:/home/ec2-user/app.log
-            StandardError=file:/home/ec2-user/app-error.log
+        [Service]
+        User=ec2-user
+        ExecStart=/usr/bin/java -jar /home/ec2-user/myapp.jar
+        Restart=always
+        RestartSec=5
+        StandardOutput=file:/home/ec2-user/app.log
+        StandardError=file:/home/ec2-user/app-error.log
 
-            [Install]
-            WantedBy=multi-user.target
-            EOL
+        [Install]
+        WantedBy=multi-user.target
+        EOL
         sudo systemctl daemon-reload
         sudo systemctl enable myapp
         sudo systemctl start myapp
