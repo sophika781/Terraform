@@ -230,7 +230,7 @@ resource "aws_ami_from_instance" "app_ami" {
   name               = "EC2 AMI"
   source_instance_id = aws_instance.app_server.id
   depends_on         = [aws_instance.app_server]
-  
+
 }
 
 
