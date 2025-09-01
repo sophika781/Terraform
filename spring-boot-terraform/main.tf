@@ -177,6 +177,7 @@ resource "aws_instance" "app_server" {
   subnet_id                   = aws_subnet.public_1.id
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
+  depends_on                  = [aws_db_instance.postgre_db]
   tags = {
     "Name" = var.instance_name
   }
@@ -195,6 +196,9 @@ resource "aws_instance" "app_server" {
 
         [Service]
         User=ec2-user
+        Environment="SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.postgre_db.endpoint}:5432/mydb"
+        Environment="SPRING_DATASOURCE_USERNAME=pgadmin"
+        Environment="SPRING_DATASOURCE_PASSWORD=${var.rds_password}"
         ExecStart=/usr/bin/java -jar /home/ec2-user/myapp.jar
         Restart=always
         RestartSec=5
@@ -214,30 +218,6 @@ resource "aws_ami_from_instance" "app_ami" {
   name               = "EC2 AMI"
   source_instance_id = aws_instance.app_server.id
   depends_on         = [aws_instance.app_server]
-
-  #provisioner "remote-exec" {
-  #  inline = [
-  #    "while [ ! -f /tmp/app_ready ]; do sleep 5; done"
-  #  ]
-
-  #  connection {
-  #    type        = "ssh"
-  #    host        = aws_instance.app_server.public_ip
-  #    user        = "ec2-user"
-  #    private_key = file("~/.ssh/test-pair.pem")
-  #  }
-  #}
-}
-
-resource "aws_instance" "test_ec2" {
-  subnet_id                   = aws_subnet.public_1.id
-  ami                         = aws_ami_from_instance.app_ami.id
-  instance_type               = var.instance_type
-  vpc_security_group_ids      = [aws_security_group.server_sg.id]
-  associate_public_ip_address = true
-  tags = {
-    "Name" = "Second Server"
-  }
 }
 
 
