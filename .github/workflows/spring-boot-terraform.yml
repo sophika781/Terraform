@@ -40,12 +40,6 @@ jobs:
       uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: 1.9.8 
-
-    - name: Set up SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_TEST_PAIR_PEM }}" > ~/.ssh/test-pair.pem
-        chmod 400 ~/.ssh/test-pair.pem
         
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.    
     - name: Terraform Init
