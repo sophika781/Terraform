@@ -188,13 +188,16 @@ resource "aws_instance" "app_server" {
         set -xe
         sudo yum update -y
         sudo yum install -y java-17-amazon-corretto-headless awscli
+        sudo dnf install -y postgresql17
         aws s3 cp s3://s3-backend-bucket-sophika/spring-petclinic-3.5.0-SNAPSHOT.jar /home/ec2-user/myapp.jar
         sudo chown ec2-user:ec2-user /home/ec2-user/myapp.jar
+
         sudo tee /etc/myapp.env > /dev/null <<EOL
-        SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.postgre_db.endpoint}:5432/mydb
+        SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.postgre_db.endpoint}/mydb
         SPRING_DATASOURCE_USERNAME=pgadmin
         SPRING_DATASOURCE_PASSWORD=${var.rds_password}
         EOL
+
         sudo tee /etc/systemd/system/myapp.service > /dev/null <<EOL
         [Unit]
         Description=Spring Boot Application
