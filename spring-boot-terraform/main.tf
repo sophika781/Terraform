@@ -86,7 +86,7 @@ resource "aws_security_group" "server_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [var.ingress_cidr_block]
+    security_groups = [aws_security_group.alb_sg.id]
   }
   ingress {
     description = "Spring Boot"
@@ -117,6 +117,25 @@ resource "aws_security_group" "db_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    cidr_blocks = [var.egress_cidr_block]
+  }
+}
+
+resource "aws_security_group" "alb_sg" {
+  name   = var.alb_security_group_name
+  vpc_id = aws_vpc.main.id
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.ingress_cidr_block]
+  }
+
+  egress {
+    from_port   = var.egress_from_port
+    to_port     = var.egress_to_port
+    protocol    = var.egress_protocol
     cidr_blocks = [var.egress_cidr_block]
   }
 }
@@ -228,5 +247,59 @@ resource "aws_ami_from_instance" "app_ami" {
   depends_on         = [aws_instance.app_server]
 }
 
+resource "aws_launch_template" "my_launch_template" {
+  name                   = "my-launch-template"
+  image_id               = aws_ami_from_instance.app_ami.id
+  instance_type          = var.instance_type
+  key_name               = "test-pair"
+  vpc_security_group_ids = [aws_security_group.server_sg.id]
+}
 
+resource "aws_lb_target_group" "app_tg" {
+  name     = "app-tg-terraform"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
 
+  health_check {
+    path                = "/actuator/health"
+    protocol            = "HTTP"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 10
+  }
+}
+
+resource "aws_lb" "app_lb" {
+  name               = "app-lb-terraform"
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+}
+
+resource "aws_lb_listener" "app_lb_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = 80
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_tg.arn
+  }
+}
+
+resource "aws_autoscaling_group" "app_asg" {
+  name                = "app-asg-terraform"
+  desired_capacity    = 2
+  min_size            = 2
+  max_size            = 3
+  vpc_zone_identifier = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+  health_check_type   = "EC2"
+
+  launch_template {
+    id      = aws_launch_template.my_launch_template.id
+    version = "$Latest"
+  }
+  target_group_arns = [aws_lb_target_group.app_tg.arn]
+  depends_on        = [aws_launch_template.my_launch_template]
+}
