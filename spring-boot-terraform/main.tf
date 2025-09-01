@@ -253,6 +253,11 @@ resource "aws_launch_template" "my_launch_template" {
   instance_type          = var.instance_type
   key_name               = "test-pair"
   vpc_security_group_ids = [aws_security_group.server_sg.id]
+  network_interfaces {
+    associate_public_ip_address = true
+    subnet_id                   = aws_subnet.public_1.id
+    security_groups             = [aws_security_group.server_sg.id]
+  }
 }
 
 resource "aws_lb_target_group" "app_tg" {
