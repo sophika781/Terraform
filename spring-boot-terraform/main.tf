@@ -10,28 +10,43 @@ resource "aws_subnet" "public_1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.0.0/24"
   availability_zone = "us-east-1a"
+  tags = {
+    "Name" = "Public Subnet 1"
+  }
 }
 
 resource "aws_subnet" "public_2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1b"
+  tags = {
+    "Name" = "Public Subnet 2"
+  }
 }
 
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.2.0/24"
   availability_zone = "us-east-1a"
+  tags = {
+    "Name" = "Private Subnet 1"
+  }
 }
 
 resource "aws_subnet" "private_2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.3.0/24"
   availability_zone = "us-east-1b"
+  tags = {
+    "Name" = "Private Subnet 2"
+  }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
+  tags = {
+    "Name" = "Internet-Gateway"
+  }
 }
 
 resource "aws_route_table" "public_table" {
@@ -40,6 +55,9 @@ resource "aws_route_table" "public_table" {
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
+  }
+  tags = {
+    "Name" = "Public Route Table"
   }
 }
 
@@ -209,6 +227,15 @@ resource "aws_ami_from_instance" "app_ami" {
   #    private_key = file("~/.ssh/test-pair.pem")
   #  }
   #}
+}
+
+resource "aws_instance" "test_ec2" {
+  ami                    = aws_ami_from_instance.app_ami.id
+  instance_type          = var.instance_type
+  vpc_security_group_ids = [aws_security_group.server_sg.id]
+  tags = {
+    "Name" = "Second Server"
+  }
 }
 
 
