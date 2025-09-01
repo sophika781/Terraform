@@ -197,7 +197,6 @@ resource "aws_instance" "app_server" {
         SPRING_DATASOURCE_USERNAME=pgadmin
         SPRING_DATASOURCE_PASSWORD=${var.rds_password}
         SPRING_PROFILES_ACTIVE=postgres
-        SPRING_JPA_HIBERNATE_DDL_AUTO=create
         EOL
 
         sudo tee /etc/systemd/system/myapp.service > /dev/null <<EOL
