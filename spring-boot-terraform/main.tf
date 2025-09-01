@@ -189,7 +189,6 @@ resource "aws_instance" "app_server" {
         sudo systemctl daemon-reload
         sudo systemctl enable myapp
         sudo systemctl start myapp
-        touch /tmp/app_ready
     EOF
 }
 
@@ -198,18 +197,18 @@ resource "aws_ami_from_instance" "app_ami" {
   source_instance_id = aws_instance.app_server.id
   depends_on         = [aws_instance.app_server]
 
-  provisioner "remote-exec" {
-    inline = [
-      "while [ ! -f /tmp/app_ready ]; do sleep 5; done"
-    ]
+  #provisioner "remote-exec" {
+  #  inline = [
+  #    "while [ ! -f /tmp/app_ready ]; do sleep 5; done"
+  #  ]
 
-    connection {
-      type        = "ssh"
-      host        = aws_instance.app_server.public_ip
-      user        = "ec2-user"
-      private_key = file("~/.ssh/test-pair.pem")
-    }
-  }
+  #  connection {
+  #    type        = "ssh"
+  #    host        = aws_instance.app_server.public_ip
+  #    user        = "ec2-user"
+  #    private_key = file("~/.ssh/test-pair.pem")
+  #  }
+  #}
 }
 
 
