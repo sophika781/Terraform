@@ -255,8 +255,6 @@ resource "aws_launch_template" "my_launch_template" {
   vpc_security_group_ids = [aws_security_group.server_sg.id]
   network_interfaces {
     associate_public_ip_address = true
-    subnet_id                   = aws_subnet.public_1.id
-    security_groups             = [aws_security_group.server_sg.id]
   }
 }
 
