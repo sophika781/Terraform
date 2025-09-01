@@ -57,3 +57,9 @@ variable "instance_name" {
   type        = string
   default     = "Spring Boot Server"
 }
+
+variable "rds_password" {
+  description = "Password for the RDS db instance"
+  type        = string
+  sensitive   = true
+}

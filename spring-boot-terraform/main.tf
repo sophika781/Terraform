@@ -151,3 +151,32 @@ resource "aws_instance" "app_server" {
         nohup java -jar /home/ec2-user/myapp.jar > /home/ec2-user/app.log 2> /home/ec2-user/app-error.log &
     EOF
 }
+
+resource "aws_db_subnet_group" "private_group" {
+  name       = "private_subnet_group_sophika"
+  subnet_ids = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+}
+
+resource "aws_db_instance" "postgre_db" {
+  engine            = "postgres"
+  engine_version    = "17.6"
+  identifier        = "postgres-rds"
+  instance_class    = "db.t3.micro"
+  allocated_storage = 20
+  storage_type      = "gp2"
+
+  username = "pgadmin"
+  password = var.rds_password
+
+  vpc_security_group_ids = [aws_security_group.db_sg]
+  db_subnet_group_name   = aws_db_subnet_group.private_group.name
+  skip_final_snapshot    = true
+}
+
+resource "aws_ami_from_instance" "app_ami" {
+  name               = "EC2 AMI"
+  source_instance_id = aws_instance.app_server.id
+  depends_on         = [aws_instance.app_server]
+}
+
+
