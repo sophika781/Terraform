@@ -190,6 +190,13 @@ resource "aws_instance" "app_server" {
         sudo yum install -y java-17-amazon-corretto-headless awscli
         aws s3 cp s3://s3-backend-bucket-sophika/spring-petclinic-3.5.0-SNAPSHOT.jar /home/ec2-user/myapp.jar
         sudo chown ec2-user:ec2-user /home/ec2-user/myapp.jar
+
+        sudo tee /etc/myapp.env > /dev/null <<EOL
+        SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.postgre_db.endpoint}:5432/mydb
+        SPRING_DATASOURCE_USERNAME=pgadmin
+        SPRING_DATASOURCE_PASSWORD=${var.rds_password}
+        EOL
+
         sudo tee /etc/systemd/system/myapp.service > /dev/null <<EOL
         [Unit]
         Description=Spring Boot Application
@@ -197,9 +204,7 @@ resource "aws_instance" "app_server" {
 
         [Service]
         User=ec2-user
-        Environment="SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.postgre_db.endpoint}:5432/mydb"
-        Environment="SPRING_DATASOURCE_USERNAME=pgadmin"
-        Environment="SPRING_DATASOURCE_PASSWORD=${var.rds_password}"
+        EnvironmentFile=/etc/myapp.env
         ExecStart=/usr/bin/java -jar /home/ec2-user/myapp.jar
         Restart=always
         RestartSec=5
@@ -209,9 +214,15 @@ resource "aws_instance" "app_server" {
         [Install]
         WantedBy=multi-user.target
         EOL
+
         sudo systemctl daemon-reload
         sudo systemctl enable myapp
         sudo systemctl start myapp
+        sudo dnf install -y postgresql17 postgresql17-server postgresql17-contrib
+        sudo /usr/bin/postgresql-setup --initdb
+        sudo systemctl enable postgresql
+        sudo systemctl enable postgresql
+        sudo systemctl start postgresql
     EOF
 }
 
