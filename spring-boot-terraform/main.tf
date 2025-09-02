@@ -1,15 +1,15 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.region
 }
 
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr
 }
 
 resource "aws_subnet" "public_1" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.0.0/24"
-  availability_zone = "us-east-1a"
+  cidr_block        = var.public_cidr_1
+  availability_zone = var.az_1
   tags = {
     "Name" = "Public Subnet 1"
   }
@@ -17,8 +17,8 @@ resource "aws_subnet" "public_1" {
 
 resource "aws_subnet" "public_2" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1b"
+  cidr_block        = var.public_cidr_2
+  availability_zone = var.az_2
   tags = {
     "Name" = "Public Subnet 2"
   }
@@ -26,8 +26,8 @@ resource "aws_subnet" "public_2" {
 
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1a"
+  cidr_block        = var.private_cidr_1
+  availability_zone = var.az_1
   tags = {
     "Name" = "Private Subnet 1"
   }
@@ -35,8 +35,8 @@ resource "aws_subnet" "private_1" {
 
 resource "aws_subnet" "private_2" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.3.0/24"
-  availability_zone = "us-east-1b"
+  cidr_block        = var.private_cidr_2
+  availability_zone = var.az_2
   tags = {
     "Name" = "Private Subnet 2"
   }
@@ -111,7 +111,7 @@ resource "aws_security_group" "db_sg" {
     protocol    = "tcp"
     from_port   = 5432
     to_port     = 5432
-    cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24"]
+    cidr_blocks = [var.public_cidr_1, var.public_cidr_2]
   }
   egress {
     from_port   = 0
@@ -149,13 +149,13 @@ resource "aws_db_instance" "postgre_db" {
   engine            = "postgres"
   engine_version    = "17.6"
   identifier        = "postgres-rds"
-  instance_class    = "db.t3.micro"
+  instance_class    = var.instance_class
   allocated_storage = 20
   storage_type      = "gp2"
 
-  username = "pgadmin"
+  username = var.rds_username
   password = var.rds_password
-  db_name  = "mydb"
+  db_name  = var.db_name
 
   vpc_security_group_ids = [aws_security_group.db_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.private_group.name
@@ -193,7 +193,7 @@ resource "aws_instance" "app_server" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.server_sg.id]
-  key_name                    = "test-pair"
+  key_name                    = var.key_pair
   subnet_id                   = aws_subnet.public_1.id
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.ec2_instance_profile.name
@@ -213,7 +213,7 @@ resource "aws_instance" "app_server" {
 
         sudo tee /etc/myapp.env > /dev/null <<EOL
         SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.postgre_db.endpoint}/mydb
-        SPRING_DATASOURCE_USERNAME=pgadmin
+        SPRING_DATASOURCE_USERNAME=${var.rds_username}
         SPRING_DATASOURCE_PASSWORD=${var.rds_password}
         SPRING_PROFILES_ACTIVE=postgres
         EOL
@@ -251,7 +251,7 @@ resource "aws_launch_template" "my_launch_template" {
   name          = "my-launch-template"
   image_id      = aws_ami_from_instance.app_ami.id
   instance_type = var.instance_type
-  key_name      = "test-pair"
+  key_name      = var.key_pair
   network_interfaces {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.server_sg.id]
