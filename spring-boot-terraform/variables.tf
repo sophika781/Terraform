@@ -114,6 +114,7 @@ variable "instance_name" {
 variable "rds_username" {
   description = "Username for the RDS database"
   type        = string
+  default     = "pgadmin"
 }
 
 variable "rds_password" {
