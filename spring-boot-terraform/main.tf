@@ -248,14 +248,13 @@ resource "aws_ami_from_instance" "app_ami" {
 }
 
 resource "aws_launch_template" "my_launch_template" {
-  name                   = "my-launch-template"
-  image_id               = aws_ami_from_instance.app_ami.id
-  instance_type          = var.instance_type
-  key_name               = "test-pair"
-  vpc_security_group_ids = [aws_security_group.server_sg.id]
+  name          = "my-launch-template"
+  image_id      = aws_ami_from_instance.app_ami.id
+  instance_type = var.instance_type
+  key_name      = "test-pair"
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.server_sg.id]
+    security_groups             = aws_security_group.server_sg.id
   }
 }
 
@@ -299,10 +298,10 @@ resource "aws_autoscaling_group" "app_asg" {
   max_size            = 3
   vpc_zone_identifier = [aws_subnet.public_1.id, aws_subnet.public_2.id]
   health_check_type   = "EC2"
-
   launch_template {
     id      = aws_launch_template.my_launch_template.id
     version = "$Latest"
+
   }
   target_group_arns = [aws_lb_target_group.app_tg.arn]
   depends_on        = [aws_launch_template.my_launch_template]
