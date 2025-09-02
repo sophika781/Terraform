@@ -254,7 +254,7 @@ resource "aws_launch_template" "my_launch_template" {
   key_name      = "test-pair"
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = aws_security_group.server_sg.id
+    security_groups             = [aws_security_group.server_sg.id]
   }
 }
 
