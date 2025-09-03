@@ -222,7 +222,7 @@ resource "aws_instance" "app_server" {
         ExecStartPre=-/usr/bin/docker stop myapp
         ExecStartPre=-/usr/bin/docker rm myapp
         ExecStartPre=/usr/bin/docker pull sophika171g/myapp:latest
-        ExecStart=/usr/bin/docker run --name myapp -p 80:8080 sophika171g/myapp:latest
+        ExecStart=/usr/bin/docker run --name myapp -p 8080:8080 sophika171g/myapp:latest
         ExecStop=/usr/bin/docker stop myapp
 
         [Install]
@@ -299,3 +299,4 @@ resource "aws_autoscaling_group" "app_asg" {
   target_group_arns = [aws_lb_target_group.app_tg.arn]
   depends_on        = [aws_launch_template.my_launch_template]
 }
+
