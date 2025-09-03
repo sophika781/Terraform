@@ -42,7 +42,7 @@ jobs:
         terraform_version: 1.9.8 
 
     - name: Init Main Project
-      run: terraform init
+      run: terraform init -backend-config="bucket=${{ secrets.S3_BACKEND_BUCKET}}" -backend-config="key=vpc/${{ secrets.TF_STATE }}" -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMO_DB_TABLE }}" 
 
     - name: Terraform Format
       run: terraform fmt -check
