@@ -211,8 +211,8 @@ resource "aws_instance" "app_server" {
         sudo service docker start
         sudo systemctl enable docker
         sudo systemctl start docker
-        docker pull sophika171g/myapp:latest
-        docker run -d -p 8080:8080 sophika171g/myapp:latest
+        sudo docker pull sophika171g/myapp:latest
+        sudo docker run -d -p 8080:8080 sophika171g/myapp:latest
     EOF
 }
 
