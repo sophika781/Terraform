@@ -217,13 +217,13 @@ resource "aws_instance" "app_server" {
 }
 
 resource "aws_ami_from_instance" "app_ami" {
-  name               = "EC2 AMI"
+  name               = "EC2 AMI Docker"
   source_instance_id = aws_instance.app_server.id
   depends_on         = [aws_instance.app_server]
 }
 
 resource "aws_launch_template" "my_launch_template" {
-  name          = "my-launch-template"
+  name          = "my-launch-template-docker"
   image_id      = aws_ami_from_instance.app_ami.id
   instance_type = var.instance_type
   key_name      = var.key_pair
@@ -234,7 +234,7 @@ resource "aws_launch_template" "my_launch_template" {
 }
 
 resource "aws_lb_target_group" "app_tg" {
-  name     = "app-tg-terraform"
+  name     = "app-tg-terraform-docker"
   port     = 8080
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
@@ -250,7 +250,7 @@ resource "aws_lb_target_group" "app_tg" {
 }
 
 resource "aws_lb" "app_lb" {
-  name               = "app-lb-terraform"
+  name               = "app-lb-terraform-docker"
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = [aws_subnet.public_1.id, aws_subnet.public_2.id]
@@ -267,7 +267,7 @@ resource "aws_lb_listener" "app_lb_listener" {
 }
 
 resource "aws_autoscaling_group" "app_asg" {
-  name                = "app-asg-terraform"
+  name                = "app-asg-terraform-docker"
   desired_capacity    = 2
   min_size            = 2
   max_size            = 3
