@@ -1,0 +1,73 @@
+name: 'Spring Boot Terraform w/ Docker'
+
+on:
+  push:
+    branches:
+      - "master"
+    paths: 
+      - "spring-boot-docker-terraform/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: spring-boot-docker-terraform
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.ACCESSKEY }}
+        aws-secret-access-key: ${{ secrets.SECRETACCESSKEY }}
+        aws-region: us-east-1
+        
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.9.8 
+
+    - name: Build Docker Image
+      run: docker build -t sophika171g/myapp:latest .
+
+    - name: Push Docker Image to the Registry
+      run : docker push sophika171g/myapp:latest 
+      
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.    
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      run: terraform plan -var="rds_password=${{ secrets.RDS_PASSWORD }}"
+
+      # On push to "master", build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    - name: Terraform Apply
+      run: terraform apply -auto-approve -var="rds_password=${{ secrets.RDS_PASSWORD }}"
+
+    - name: Terraform State List
+      run: terraform state list
