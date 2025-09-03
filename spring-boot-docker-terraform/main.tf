@@ -126,8 +126,8 @@ resource "aws_security_group" "alb_sg" {
   vpc_id = aws_vpc.main.id
   ingress {
     description = "HTTP"
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = [var.ingress_cidr_block]
   }
@@ -211,9 +211,26 @@ resource "aws_instance" "app_server" {
         sudo service docker start
         sudo systemctl enable docker
         sudo systemctl start docker
-        sudo docker pull sophika171g/myapp:latest
-        sudo docker run -d -p 8080:8080 sophika171g/myapp:latest
-    EOF
+        cat <<EOF | sudo tee /etc/systemd/system/myapp.service
+        [Unit]
+        Description=Docker Container for MyApp
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Restart=always
+        ExecStartPre=-/usr/bin/docker stop myapp
+        ExecStartPre=-/usr/bin/docker rm myapp
+        ExecStartPre=/usr/bin/docker pull sophika171g/myapp:latest
+        ExecStart=/usr/bin/docker run --name myapp -p 80:8080 sophika171g/myapp:latest
+        ExecStop=/usr/bin/docker stop myapp
+
+        [Install]
+        WantedBy=multi-user.target
+        sudo systemctl daemon-reload
+        sudo systemctl enable myapp
+        sudo systemctl start myapp
+        EOF
 }
 
 resource "aws_ami_from_instance" "app_ami" {
@@ -258,7 +275,7 @@ resource "aws_lb" "app_lb" {
 
 resource "aws_lb_listener" "app_lb_listener" {
   load_balancer_arn = aws_lb.app_lb.arn
-  port              = 8080
+  port              = 80
   protocol          = "HTTP"
   default_action {
     type             = "forward"
