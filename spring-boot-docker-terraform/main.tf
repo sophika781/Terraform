@@ -211,7 +211,7 @@ resource "aws_instance" "app_server" {
         sudo service docker start
         sudo systemctl enable docker
         sudo systemctl start docker
-        cat <<EOF | sudo tee /etc/systemd/system/myapp.service
+        cat <<EOL | sudo tee /etc/systemd/system/myapp.service
         [Unit]
         Description=Docker Container for MyApp
         After=docker.service
@@ -227,6 +227,7 @@ resource "aws_instance" "app_server" {
 
         [Install]
         WantedBy=multi-user.target
+        EOL
         sudo systemctl daemon-reload
         sudo systemctl enable myapp
         sudo systemctl start myapp
