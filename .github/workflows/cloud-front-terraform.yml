@@ -43,7 +43,7 @@ jobs:
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.    
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -backend-config="bucket=${{ secrets.S3_BACKEND_BUCKET}}" -backend-config="key=spring-boot-docker/${{ secrets.TF_STATE }}" -backend-config="region=us-east-1" -backend-config="dynamodb_table=${{ secrets.DYNAMO_DB_TABLE }}" 
 
     - name: Terraform Format
       run: terraform fmt -check
